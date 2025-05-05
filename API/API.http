@@ -1,0 +1,12 @@
+@API_HostAddress = https://localhost:7001
+
+GET {{API_HostAddress}}/api/activities
+Accept: application/json
+
+### existing activity
+GET {{API_HostAddress}}/api/activities/0e08d2a0-c933-44d0-a9d8-9f6e791e9948
+Accept: application/json
+
+### non existing activity
+GET {{API_HostAddress}}/api/activities/0e08d2a0-c933-44d0-a9d8-9f6e791e9999
+Accept: application/json
