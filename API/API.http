@@ -10,3 +10,34 @@ Accept: application/json
 ### non existing activity
 GET {{API_HostAddress}}/api/activities/0e08d2a0-c933-44d0-a9d8-9f6e791e9999
 Accept: application/json
+
+### create activity
+POST {{API_HostAddress}}/api/activities
+Content-Type: application/json
+
+{
+    "title": "New Activity POST",
+    "description": "This is a new activity post test.",
+    "category": "work",
+    "date": "2023-10-01T10:00:00",
+    "city": "New York",
+    "venue": "Central Park"
+}
+
+### update activity
+PUT {{API_HostAddress}}/api/activities
+Content-Type: application/json
+
+{
+    "id": "f990e0f7-e2bd-4ac9-a9a2-e86f07764eb1",
+    "title": "UPDATED Activity POST",
+    "description": "This is an updated new activity post test.",
+    "category": "work",
+    "date": "2023-10-01T10:00:00",
+    "city": "New York",
+    "venue": "Brooklyn Bridge"
+}
+
+### delete activity
+DELETE {{API_HostAddress}}/api/activities/bc563438-c986-45ca-a342-182be5fe1ab5
+Content-Type: application/json
