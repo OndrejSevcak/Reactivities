@@ -1,11 +1,12 @@
-import { Container, CssBaseline } from "@mui/material";
+import { Box, Container, CssBaseline } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import NavBar from "./NavBar";
-import ActivityDashboard from "../../features/activities/ActivityDashboard";
+import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
 
 function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
 
   useEffect(() => {
     //fetch datat using axios with specified response type
@@ -22,14 +23,27 @@ function App() {
     return () => {}
   }, []);
 
+  const handleSelectActivity = (id: string) => {
+    setSelectedActivity(activities.find(activity => activity.id === id));
+  }
+
+  const handleCancelSelectActivity = () => {
+    setSelectedActivity(undefined);
+  }
+
   return (
-      <>
+      <Box sx={{bgcolor: '#eeeeee'}}>
           <CssBaseline />
           <NavBar />
           <Container maxWidth='xl' sx={{ mt: 3 }}>
-            <ActivityDashboard activities={activities} />
+              <ActivityDashboard 
+                  activities={activities} 
+                  selectActivity={handleSelectActivity}
+                  cancelSelectActivity={handleCancelSelectActivity}
+                  selectedActivity={selectedActivity}
+              />
           </Container>
-      </>
+      </Box>
   )
 }
 
