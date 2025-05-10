@@ -2,10 +2,11 @@ import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 
 type Props = {
     onFormClose: () => void,
-    activity?: Activity,   
+    activity?: Activity,
+    onFormSubmit: (activity: Activity) => void   
 }
 
-export default function ActivityForm({ onFormClose, activity }: Props) {
+export default function ActivityForm({ onFormClose, activity, onFormSubmit }: Props) {
     
     const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -16,6 +17,9 @@ export default function ActivityForm({ onFormClose, activity }: Props) {
         });
         console.log(formData);
         console.log(data);
+
+        if (activity) data.id = activity.id; //if we are working on an existing activity (editing)
+        onFormSubmit(data as unknown as Activity);
     }
 
     return (
