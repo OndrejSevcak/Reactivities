@@ -74,6 +74,12 @@ function App() {
     setEditMode(false);
   }
 
+  const handleDeleteActivity = (id: string) => {
+    //remove the activity with the specified id from the activities array
+    setActivities(activities.filter(activity => activity.id !== id));
+    //filter() creates a new array with all elements that pass the test implemented by the provided function
+  }
+
   return (
       <Box sx={{bgcolor: '#eeeeee'}}>
           <CssBaseline />
@@ -88,6 +94,7 @@ function App() {
                   onFormOpen={handleFormOpened}
                   onFormClose={handleFormClosed}
                   onFormSubmit={handleSubmitForm}
+                  onDeleteActivity={handleDeleteActivity}
               />
           </Container>
       </Box>
