@@ -11,7 +11,7 @@ function App() {
   const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
 
-  const {data: activities, isPending} = useQuery({
+  const {data: activities, isPending} = useQuery({    // -> {data: activities, isPending} is destructuring assignment
     queryKey: ['activities'],
     queryFn: async () => {
       const response = await axios.get<Activity[]>('https://localhost:7001/api/activities');
@@ -76,7 +76,7 @@ function App() {
   }
 
   return (
-      <Box sx={{bgcolor: '#eeeeee'}}>
+      <Box sx={{bgcolor: '#eeeeee', minHeight: '100vh'}}>
           <CssBaseline />
           <NavBar onOpenForm={handleFormOpened} />
           <Container maxWidth='xl' sx={{ mt: 3 }}>
