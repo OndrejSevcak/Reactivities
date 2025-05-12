@@ -1,31 +1,26 @@
-import { Box, Container, CssBaseline } from "@mui/material";
+import { Box, Container, CssBaseline, Typography } from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import NavBar from "./NavBar";
 import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
+import { useQuery } from "@tanstack/react-query";
 
 function App() {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  //const [activities, setActivities] = useState<Activity[]>([]); -> replaced with useQuery
+  
   const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
 
-  useEffect(() => {
-    //fetch data using axios with specified response type
-    axios.get<Activity[]>('https://localhost:7001/api/activities')
-      .then(response => setActivities(response.data))
-
-    //using fetch to get the data from the api
-    // fetch('https://localhost:7001/api/activities')
-    //   .then(response => response.json())  //wraping the javascript promise
-    //   .then(data => setActivities(data))
-    //   .catch(error => console.error('Error fetching activities:', error));
-
-    //cleanup function
-    return () => {}
-  }, []);
+  const {data: activities, isPending} = useQuery({
+    queryKey: ['activities'],
+    queryFn: async () => {
+      const response = await axios.get<Activity[]>('https://localhost:7001/api/activities');
+      return response.data;
+    }
+  })
 
   const handleSelectActivity = (id: string) => {
-    setSelectedActivity(activities.find(activity => activity.id === id));
+    setSelectedActivity(activities!.find(activity => activity.id === id));
   }
 
   const handleCancelSelectActivity = () => {
@@ -46,7 +41,7 @@ function App() {
   //or create a new activity -> new activity is added to the activities array
   const handleSubmitForm = (activity: Activity) => {
     if (activity.id){
-      setActivities(activities.map(a => a.id === activity.id ? activity : a))
+      //setActivities(activities.map(a => a.id === activity.id ? activity : a))
       //same as
         // setActivities(activities.map(a => {
         //   if(a.id === activity.id){
@@ -64,8 +59,8 @@ function App() {
     }
     else{
       const newActivity = {...activity, id: activities.length.toString()}      
-      setActivities([...activities, newActivity])
-      setSelectedActivity(newActivity)
+      //setActivities([...activities, newActivity])
+      //setSelectedActivity(newActivity)
       //expression [...activities] creates a shallow copy of the activities array (original array is not modified directly)
       //expression {..activity, id: activities.length.toString()} creates a new object that contains all properties of the activity object and adds a new property id with a value of the current length of the activities array
       //The spread operator {...activity} copies all the properties of the activity object into the new object.
@@ -76,7 +71,7 @@ function App() {
 
   const handleDeleteActivity = (id: string) => {
     //remove the activity with the specified id from the activities array
-    setActivities(activities.filter(activity => activity.id !== id));
+    //setActivities(activities.filter(activity => activity.id !== id));
     //filter() creates a new array with all elements that pass the test implemented by the provided function
   }
 
@@ -85,7 +80,10 @@ function App() {
           <CssBaseline />
           <NavBar onOpenForm={handleFormOpened} />
           <Container maxWidth='xl' sx={{ mt: 3 }}>
-              <ActivityDashboard 
+              {!activities || isPending ? (
+                <Typography>Loading</Typography>
+              ) : (
+                <ActivityDashboard 
                   activities={activities} 
                   selectActivity={handleSelectActivity}
                   cancelSelectActivity={handleCancelSelectActivity}
@@ -96,6 +94,8 @@ function App() {
                   onFormSubmit={handleSubmitForm}
                   onDeleteActivity={handleDeleteActivity}
               />
+              )}
+
           </Container>
       </Box>
   )
