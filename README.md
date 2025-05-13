@@ -261,13 +261,16 @@ Docs: [TanStack Query](https://tanstack.com/query/latest/docs/framework/react)
 - Type definitions
 
 ### `map()` vs `forEach()`
-- `map()` returns a new array
+- `map()` returns a new array -> important for React to detect changes and trigger re-renders
 - `forEach()` does not return a new array (side effects only)
 
 ### Conditional Rendering
+- JavaScript/TypeScript treats certain values as **"falsy," such as null, undefined, 0, false, NaN, or an empty string ("")**.
+
 ```tsx
 if (activity.id) {
   // Safe check for null, undefined, 0, etc.
+  //If activity.id is any of these falsy values, the condition will evaluate to false.
 }
 ```
 
@@ -287,7 +290,7 @@ setActivities(activities.map(a => a.id === activity.id ? activity : a));
 ```
 - the result of activities.map() is a new array and the length of resulting array is always the same as the original array
 - in the new array the updated activity has replaced the old one, all other activities remain unchanged
-- This approach ensures immutability, a key principle in React state management. 
+- **This approach ensures immutability, a key principle in React state management.** 
 - Instead of modifying the original activities array directly, a new array is created and used to update the state. 
 - This helps React detect changes and re-render the component efficiently.
 
@@ -308,6 +311,13 @@ setSelectedActivity(newActivity);
 - Independent layers
 - [Read the blog](https://blog.cleancoder.com/uncle-bob/2012/08/13/The-Clean-Architecture.html)
 
+**Our solution structure**
+- API -> infrastructure layer
+- Application -> use case layer
+- Domain -> entities layer
+- Persistence -> database layer
+- client -> front-end (presentation) layer 
+
 ### CQRS – Command Query Responsibility Segregation
 - separate reads and writes operations in applications
 - read processes are called ‘Queries’ and Write processes are called ‘Commands’.
@@ -325,8 +335,73 @@ setSelectedActivity(newActivity);
 	**Single database CQRS Flow:**
 		- DataBase -> DataAccess -> Query -> API -> Command -> Domain -> Persistence -> Database
 
+**Create activity command**
+```csharp
+public class CreateActivity
+{
+    //// The Command class represents a command in the CQRS pattern. Commands are used to encapsulate data and intent for performing a specific action, such as creating an activity in this case.
+    public class Command : IRequest<string>
+    {
+        public required Activity Activity { get; set; }
+    }
+
+    // The Handler class is responsible for handling the Command. It implements the IRequestHandler<Command, string> interface from MediatR, which is a library commonly used to implement CQRS in .NET applications.
+    public class Handler(AppDbContext context) : IRequestHandler<Command, string>
+    {
+        public async Task<string> Handle(Command request, CancellationToken cancellationToken)
+        {
+            context.Activities.Add(request.Activity); //adds the activity to the context -> so there is no need to use Async version
+            await context.SaveChangesAsync(cancellationToken); //only here we communicate with the database
+
+            return request.Activity.Id; //returns the id of the activity that was created, because it is created server side
+        }
+    }
+}
+```
+**Get activity detail query**
+```csharp
+public class GetActivityDetails
+{
+    //Here we define an Id query parameter to be passed to the handler
+    public class Query : IRequest<Activity>
+    {
+        public required string Id { get; set; }
+    }
+
+    public class Handler(AppDbContext context) : IRequestHandler<Query, Activity>
+    {
+        public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
+        {
+            var activity = await context.Activities.FindAsync([request.Id], cancellationToken);
+
+            if(activity == null) throw new Exception("Activity not found");
+
+            return activity;
+        }
+    }
+}
+```
+
 ### Mediator Pattern
 - Decouples communication between objects - helps to reduce the dependencies between objects
 - Handlers communicate via Mediator, not directly - objects should do the communication through the mediator to prevent direct communication between each other
 
+**MediatR package for .NET**
+- package. https://github.com/jbogard/MediatR
+
+```bash
+dotnet add package MediatR
+```
+
+```csharp
+//registration in Program.cs
+builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>());
+```
+
 More: [CQRS + Mediator pattern guide](https://medium.com/@darshana-edirisinghe/cqrs-and-mediator-design-patterns-f11d2e9e9c2e)
+
+
+## Link to the Udemy tutorial by Neil Cummings:
+- [Complete guide to building an app with .Net Core and React](https://www.udemy.com/course/complete-guide-to-building-an-app-with-net-core-and-react/?srsltid=AfmBOooyDlfNiaOQ4FdLSF5YNZFf1JQtXtOrPZJCU-gKaBGQd56bOWFF&couponCode=CP130525)
+
+- the author does a great job explaining general development concepts along with react basics and best practices (thats why I bought this course) and I would definitely recommend it to people with existing .NET experience wanting to dive into the world of React FE development
