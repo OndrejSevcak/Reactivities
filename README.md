@@ -88,22 +88,63 @@ return <h1>{title}</h1>;
 - CSS classes: `className='myClass'`
 
 ### Hooks
-- `useState()` – for component state
-- `useEffect()` – for side effects (e.g., API calls)
+- `useState()` – for component state, have 2 arguments - variable and setter function
+- `useEffect()` – for side effects (e.g., API calls), we pass a callback, is executed when the component mounts, number of executions depends on dependency array parameter
 
+#### - NO dependency array is provided -> executes after every render
 ```tsx
-useEffect(() => {
-  console.log("Runs once after mount");
-}, []);
+    useEffect(() => {
+      console.log("Runs after every render");
+    });
+```
+
+#### - EMPTY dependency array is provided -> Executes only once, like componentDidMount
+```tsx
+    useEffect(() => {
+      console.log("Runs only once after initial render (mount)");
+    }, []);
+```
+
+#### - WITH dependencies provided -> Executes after the first render and whenever that dependency(counter) changes.
+```tsx
+    useEffect(() => {
+      console.log("Runs when `count` changes");
+    }, [count]);
 ```
 
 ### React Lifecycle Methods (Class Components)
-- `componentDidMount()` – after initial render
-- `componentDidUpdate()` – after updates
-- `componentWillUnmount()` – before unmounting
+- `componentDidMount()` – after initial render, called once
+- `componentDidUpdate()` – after updates, Called after every update (re-render), except the initial one.
+- `componentWillUnmount()` – before unmounting, Called right before the component is removed from the DOM
+
+
+| Lifecycle Event   | Hook-Based (Function)       | Class-Based Equivalent       |
+| ----------------- | --------------------------- | ---------------------------- |
+| On mount          | `useEffect(..., [])`        | `componentDidMount()`        |
+| On update         | `useEffect(..., [deps])`    | `componentDidUpdate()`       |
+| On unmount        | `return` from `useEffect()` | `componentWillUnmount()`     |
+| On every render   | `useEffect()` (no deps)     | N/A                          |
+| Before render     | Not directly possible       | `getDerivedStateFromProps()` |
+| Should re-render? | Use `React.memo`            | `shouldComponentUpdate()`    |
+
+### Lifecycle triggers
+
+| Trigger                          | What Happens                       |
+| -------------------------------- | ---------------------------------- |
+| `useState()` call                | Triggers a re-render               |
+| `props` change                   | Triggers a re-render               |
+| `useEffect` with `[dep]` changes | Runs effect cleanup + effect again |
+| Component removed from tree      | Runs cleanup (`return () => {}`)   |
+
 
 ### React StrictMode
-- Wraps your app in development to highlight issues:
+- It’s a development-only feature that helps you write better, more robust code by warning you about potential issues in your app
+- It does not render anything in the UI, but it activates additional checks and warnings in development. What it does?
+1. Detects unsafe lifecycles in class components.
+2. Warns about legacy string refs.
+3. Highlights unexpected side effects in useEffect, useLayoutEffect.
+4. Double-invokes functions like useEffect, useState initializers on purpose to help detect bugs in components that aren’t pure.
+
 ```tsx
 <StrictMode>
   <App />
@@ -139,15 +180,57 @@ import '@fontsource/roboto/700.css';
 npm install axios
 ```
 
+```tsx
+//configuring the axios http client
+const agent = axios.create({
+    baseURL: import.meta.env.VITE_API_URL, //url is stored in vite .env.development file
+});
+export default agent;
+
+//using the agent in custom hook
+import agent from "../api/agent";
+
+const {data: activities, isPending} = useQuery({    // -> {data: activities, isPending} is destructuring assignment
+        queryKey: ['activities'],
+        queryFn: async () => {
+          const response = await agent.get<Activity[]>('/activities');  //base url is configured globally in agent.ts file
+          return response.data;
+        }
+    })
+```
+
+| Feature                | Benefit                                       |
+| ---------------------- | --------------------------------------------- |
+| Promise-based API      | Clean `async/await` code                      |
+| Automatic JSON parsing | No need to call `res.json()` like `fetch`     |
+| Interceptors           | Central place to add headers or handle errors |
+| Timeout / cancel token | Easy control over slow/cancelled requests     |
+
+
 ## Form Handling
 
 ### Controlled vs. Uncontrolled Inputs
+- uncontrolled default value -> use defaultValue instead of value
 ```tsx
 <TextField label="Title" defaultValue={activity?.title} />
-const formData = new FormData(event.currentTarget);
+```
+
+### Extracting form data using new FormData()
+```tsx
+  const formData = new FormData(event.currentTarget); //built-in browser API that allows you to easily construct a set of key/value pairs representing form fields and their values.
+  const data: {[key: string]: FormDataEntryValue} = {}    //each key is a string and each value is a FormDataEntryValue (which can be a string or a File object)
+  formData.forEach((value, key) => {
+      data[key] = value;
+  });
 ```
 
 ## TanStack Query (React Query)
+- data fetching and state management(global state)
+- caching, background fetching, synchronization
+- less boilerplate then useState + useEffect
+- getting data from server for the first time -> useQuery hook
+- getting same data again from different component -> useQuery -> will get the cahed data from queryCache
+- updating the same data on the server -> useMutation hook (set, invalidate(new fetch from server), optimistic update the cache)
 
 Install:
 ```bash
@@ -192,11 +275,31 @@ if (activity.id) {
 
 ```tsx
 setActivities(activities.map(a => a.id === activity.id ? activity : a));
+//same as
+ setActivities(activities.map(a => {
+  if(a.id === activity.id){
+    return activity;
+  }
+  else{
+    return a;
+  }
+}))
+```
+- the result of activities.map() is a new array and the length of resulting array is always the same as the original array
+- in the new array the updated activity has replaced the old one, all other activities remain unchanged
+- This approach ensures immutability, a key principle in React state management. 
+- Instead of modifying the original activities array directly, a new array is created and used to update the state. 
+- This helps React detect changes and re-render the component efficiently.
 
+```tsx
 const newActivity = { ...activity, id: activities.length.toString() };
 setActivities([...activities, newActivity]);
 setSelectedActivity(newActivity);
 ```
+- expression [...activities] creates a shallow copy of the activities array (original array is not modified directly)
+- expression {..activity, id: activities.length.toString()} creates a new object that contains all properties of the activity object and adds a new property id with a value of the    current length of the activities array
+- The spread operator {...activity} copies all the properties of the activity object into the new object.
+- The activities.length.toString() ensures that the id is a string representation of the array's length, which can serve as a simple unique identifier for the new activity.
 
 ## Architectural Patterns
 
@@ -206,16 +309,24 @@ setSelectedActivity(newActivity);
 - [Read the blog](https://blog.cleancoder.com/uncle-bob/2012/08/13/The-Clean-Architecture.html)
 
 ### CQRS – Command Query Responsibility Segregation
-- **Commands** modify state (write)
-- **Queries** return data (read)
-
-#### CQRS Flow (Single DB):
-```
-Client -> API -> Application (CQRS) -> Persistence -> DB
-```
+- separate reads and writes operations in applications
+- read processes are called ‘Queries’ and Write processes are called ‘Commands’.
+- https://medium.com/@darshana-edirisinghe/cqrs-and-mediator-design-patterns-f11d2e9e9c2e
+	
+  **Command** - does something (creates news object)
+			- modifies state
+			- should not return value
+			
+	**Query** - answers a question
+		  - does not modify state
+		  - should return a value
+		  - examples: GetActivityList, GetActivityDetails
+	
+	**Single database CQRS Flow:**
+		- DataBase -> DataAccess -> Query -> API -> Command -> Domain -> Persistence -> Database
 
 ### Mediator Pattern
-- Decouples communication between objects
-- Handlers communicate via Mediator, not directly
+- Decouples communication between objects - helps to reduce the dependencies between objects
+- Handlers communicate via Mediator, not directly - objects should do the communication through the mediator to prevent direct communication between each other
 
 More: [CQRS + Mediator pattern guide](https://medium.com/@darshana-edirisinghe/cqrs-and-mediator-design-patterns-f11d2e9e9c2e)
