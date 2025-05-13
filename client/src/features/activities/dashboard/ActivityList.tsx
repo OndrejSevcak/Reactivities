@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
 import ActivityCard from "./ActivityCard";
+import { useActivities } from "../../../lib/hooks/useActivities";
 
-type Props = {
-    activities: Activity[],
-    handleSelectActivity: (id: string) => void   
-}
 
-export default function ActivityList({activities, handleSelectActivity}: Props) {            
+export default function ActivityList() {            
+    const {activities, isPending} = useActivities();
+
+    if(!activities || isPending) return <h1>Loading...</h1>;
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
@@ -14,7 +14,7 @@ export default function ActivityList({activities, handleSelectActivity}: Props) 
                 <ActivityCard 
                     key={activity.id} 
                     activity={activity} 
-                    onViewClick={() => handleSelectActivity(activity.id)}  /> 
+                /> 
             ))}
         </Box>
     )

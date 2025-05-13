@@ -249,7 +249,40 @@ const queryClient = new QueryClient();
 
 Docs: [TanStack Query](https://tanstack.com/query/latest/docs/framework/react)
 
-## React Router Hooks
+
+## Using React Router
+- https://reactrouter.com/start/data/routing
+
+**Installation**
+```bash
+npm i react-router
+```
+
+**Creating the Router.tsx file**
+
+```tsx
+import App from "../layout/App";
+import { createBrowserRouter } from "react-router";
+
+export const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <App />,
+    }
+]);
+```
+
+```tsx
+//changing <App /> for <RouterProvider router={router}> in Main.tsx
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools />
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  </StrictMode>,
+```
+
+### React Router Hooks
 - `useNavigate()`
 - `useParams()`
 - `useSearchParams()`

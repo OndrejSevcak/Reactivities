@@ -1,13 +1,10 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useActivities } from "../../../lib/hooks/useActivities";
 
-type Props = {
-    onFormClose: () => void,
-    activity?: Activity, 
-}
 
-export default function ActivityForm({ onFormClose, activity }: Props) {
+export default function ActivityForm() {
     const {updateActivity, createActivity} = useActivities();
+    const activity = {} as Activity;
 
     const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -22,11 +19,9 @@ export default function ActivityForm({ onFormClose, activity }: Props) {
         if (activity){
             data.id = activity.id; //if we are working on an existing activity (editing)
             await updateActivity.mutateAsync(data as unknown as Activity);  //we need to wait for this to finish before closing the form -> thats why we use async version
-            onFormClose(); //close the form after submitting 
         }
         else{
             await createActivity.mutateAsync(data as unknown as Activity);
-            onFormClose();
         }
     }
 
@@ -46,7 +41,7 @@ export default function ActivityForm({ onFormClose, activity }: Props) {
                 <TextField name="city" label="City" defaultValue={activity?.city} />
                 <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
                 <Box display="flex" justifyContent="end" gap={2}>
-                    <Button color="inherit" onClick={onFormClose}>Cancel</Button>
+                    <Button color="inherit" onClick={() => {}}>Cancel</Button>
                     <Button 
                         type="submit" 
                         color="success" 

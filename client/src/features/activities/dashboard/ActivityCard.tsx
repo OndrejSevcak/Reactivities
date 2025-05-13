@@ -3,10 +3,9 @@ import { useActivities } from "../../../lib/hooks/useActivities";
 
 type Props = {
     activity: Activity,
-    onViewClick: (id: string) => void
 }
 
-export default function ActivityCard({activity, onViewClick}: Props) {
+export default function ActivityCard({activity}: Props) {
   const {deleteActivity} = useActivities();
 
   const handleDeleteActivity = (id: string) => {
@@ -23,7 +22,7 @@ export default function ActivityCard({activity, onViewClick}: Props) {
         <CardActions sx={{display: 'flex', justifyContent: 'space-between', pb: 2}}>
             <Chip label={activity.category} variant="outlined" />
             <Box sx={{display: 'flex', gap: 1}}>
-              <Button size="medium" variant="contained" onClick={() => onViewClick(activity.id)}>View</Button>
+              <Button size="medium" variant="contained" onClick={() => {}}>View</Button>
               <Button 
                 size="medium" 
                 variant="contained" 
