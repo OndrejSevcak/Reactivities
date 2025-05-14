@@ -288,6 +288,22 @@ export const router = createBrowserRouter([
 - `useSearchParams()`
 - `useLocation()`
 
+**Getting the path id parameter from url**
+```tsx
+//route with id parameter
+{path: 'activities/:id', element: <ActivityDetail />},
+
+//getting the id value in components
+const {id} = useParams();
+```
+
+**Navigating using useNavigate hook**
+```tsx
+const navigate = useNavigate();
+
+navigate(`/activities/${id}`);
+```
+
 ## TypeScript Basics
 
 ### `index.d.ts`
