@@ -1,10 +1,12 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useActivities } from "../../../lib/hooks/useActivities";
+import { useNavigate, useParams } from "react-router";
 
 
 export default function ActivityForm() {
-    const {updateActivity, createActivity} = useActivities();
-    const activity = {} as Activity;
+    const {id} = useParams();
+    const {updateActivity, createActivity, activity, isLoadingActivity} = useActivities(id);
+    const navigate = useNavigate();
 
     const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -19,16 +21,23 @@ export default function ActivityForm() {
         if (activity){
             data.id = activity.id; //if we are working on an existing activity (editing)
             await updateActivity.mutateAsync(data as unknown as Activity);  //we need to wait for this to finish before closing the form -> thats why we use async version
+            navigate(`/activities/${activity.id}`);
         }
         else{
-            await createActivity.mutateAsync(data as unknown as Activity);
+            await createActivity.mutate(data as unknown as Activity, {
+                onSuccess: (id) => {
+                    navigate(`/activities/${id}`); //navigate to the new activity detail page
+                }
+            });
         }
     }
+
+    if(isLoadingActivity) return <Typography>Loading...</Typography>
 
     return (
         <Paper sx={{ borderRadius: 3, padding: 3 }}>
             <Typography variant="h5" gutterBottom color="primary">
-                Create activity
+                {activity ? 'Edit Activity' : 'Create Activity'}
             </Typography>
             <Box component="form" onSubmit={handleFormSubmit} display="flex" flexDirection="column" gap={3}>
                 <TextField name="title" label="Title" defaultValue={activity?.title} />
@@ -41,7 +50,7 @@ export default function ActivityForm() {
                 <TextField name="city" label="City" defaultValue={activity?.city} />
                 <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
                 <Box display="flex" justifyContent="end" gap={2}>
-                    <Button color="inherit" onClick={() => {}}>Cancel</Button>
+                    <Button color="inherit" onClick={() => navigate(`/activities/${activity?.id}`)}>Cancel</Button>
                     <Button 
                         type="submit" 
                         color="success" 

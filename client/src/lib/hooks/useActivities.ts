@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import agent from "../api/agent";
 
-export const useActivities = () => {
+export const useActivities = (id?: string) => {
     const queryClient = useQueryClient(); 
 
     const {data: activities, isPending} = useQuery({    // -> {data: activities, isPending} is destructuring assignment
@@ -10,6 +10,17 @@ export const useActivities = () => {
           const response = await agent.get<Activity[]>('/activities');  //base url is configured globally in agent.ts file
           return response.data;
         }
+    })
+
+    //is executed every time a component is mounted be default
+    //we want this to be executed only when when we have the id -> using the enabled property
+    const {data: activity, isLoading: isLoadingActivity} = useQuery({
+        queryKey: ['activities', id],
+        queryFn: async () => {
+            const response = await agent.get<Activity>(`/activities/${id}`);
+            return response.data;
+        },
+        enabled: !!id,   //!!id is a boolean value that is true if id is not null or undefined
     })
 
     const updateActivity = useMutation({
@@ -24,10 +35,11 @@ export const useActivities = () => {
 
     const createActivity = useMutation({
         mutationFn: async (activity: Activity) => {
-            await agent.post('/activities', activity);
+            const response = await agent.post('/activities', activity);
+            return response.data;
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries(    // lets you intelligently mark queries as stale(obsolete) and potentially refetch them too
+            await queryClient.invalidateQueries(    
                 {queryKey: ['activities']});
         }
     })
@@ -47,6 +59,8 @@ export const useActivities = () => {
         isPending,
         updateActivity,
         createActivity,
-        deleteActivity
+        deleteActivity,
+        activity,
+        isLoadingActivity
     }
 }
