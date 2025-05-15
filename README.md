@@ -283,10 +283,10 @@ export const router = createBrowserRouter([
 ```
 
 ### React Router Hooks
-- `useNavigate()`
-- `useParams()`
+- `useNavigate()` -> navigates to specified url paths
+- `useParams()` -> return path parameter values
 - `useSearchParams()`
-- `useLocation()`
+- `useLocation()` -> returns current location name
 
 **Getting the path id parameter from url**
 ```tsx
@@ -352,6 +352,12 @@ setSelectedActivity(newActivity);
 - expression {..activity, id: activities.length.toString()} creates a new object that contains all properties of the activity object and adds a new property id with a value of the    current length of the activities array
 - The spread operator {...activity} copies all the properties of the activity object into the new object.
 - The activities.length.toString() ensures that the id is a string representation of the array's length, which can serve as a simple unique identifier for the new activity.
+
+### Other used npm packages
+
+- [react-calendar](https://www.npmjs.com/package/react-calendar)
+- [date-fns](https://date-fns.org/)
+
 
 ## Architectural Patterns
 

@@ -1,5 +1,6 @@
 import { Grid } from "@mui/material";
 import ActivityList from "./ActivityList";
+import ActivityFilters from "./ActivityFilters";
 
 // type Props = {
 //     activities: Activity[],
@@ -18,7 +19,7 @@ export default function ActivityDashboard() {
                 <ActivityList />
             </Grid>
             <Grid size={5}>
-                <h4>Activity filters go here</h4>
+                <ActivityFilters />
             </Grid>
         </Grid>
   )
