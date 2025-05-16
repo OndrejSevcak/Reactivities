@@ -1,7 +1,7 @@
 import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
 import ActivityDetailPage from "../../features/activities/details/ActivityDetailPage";
 import ActivityForm from "../../features/activities/form/ActivityForm";
-import Counter from "../../features/counter/Counter";
+import Counter from "../../features/counter/Counter2";
 import HomePage from "../../features/home/HomePage";
 import App from "../layout/App";
 import { createBrowserRouter } from "react-router";
