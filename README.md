@@ -225,12 +225,15 @@ const {data: activities, isPending} = useQuery({    // -> {data: activities, isP
 ```
 
 ## TanStack Query (React Query)
-- data fetching and state management(global state)
+- data fetching and state management(global state - asynchronous)
 - caching, background fetching, synchronization
 - less boilerplate then useState + useEffect
-- getting data from server for the first time -> useQuery hook
-- getting same data again from different component -> useQuery -> will get the cahed data from queryCache
-- updating the same data on the server -> useMutation hook (set, invalidate(new fetch from server), optimistic update the cache)
+
+**Hooks**
+
+- useQuery() -> getting data from server for the first time
+- useQuery() -> getting same data again from different component, will get the cahed data from queryCache
+- useMutation() ->updating the same data on the server, (set, invalidate(new fetch from server), optimistic update the cache)
 
 Install:
 ```bash
@@ -304,7 +307,90 @@ const navigate = useNavigate();
 navigate(`/activities/${id}`);
 ```
 
-## TypeScript Basics
+## Using MobX for client side state management
+- simple state management library for react - using **observations**
+
+```bash
+npm install mobx
+npm install mobx-react-lite
+```
+
+**Observables**
+- we declare observables in a mobX store
+- our react components then 'observe' twose observables
+- they react to the state changes
+
+**Actions**
+- we have **Actions** to **update the 'observables'**
+- anyone observing those observables will be notified about the update
+
+**Computed properties**
+- are created based on a stored state and they update as the state updates
+- for example a getFullName() will combine firstName and lastName and will run every time those two state properties changes
+
+**Reactions**
+- we can take an **action** based on an observable state change and react to it
+
+**How we will use MobX**
+- we will create a class for our state store containing the properties we want to track
+- then we will use the 'Create context' which uses react context and we provide our demo store 
+- finally by using useContext hook we will get access to our global state strore in our react components
+
+**Setting up a simple 'CounterStore' state using MobX**
+
+1. Creating a 'CounterStore' class
+```tsx
+//counterStore.ts
+import { makeObservable, observable } from 'mobx';
+
+export default class CounterStore {
+    //class properties
+    title = 'Counter Store';
+    count = 0;
+
+    constructor() {
+        makeObservable(this, {
+            title: observable,  //declaring that title is observable
+            count: observable,
+        });
+    }
+}
+```
+
+2. Creating the 'CounterStore' class intance and adding it to react context API
+```tsx
+//store.ts
+import { createContext } from "react";
+import CounterStore from "./counterStore";
+
+interface Store {
+    counterStore: CounterStore
+}
+
+export const store: Store = {
+    counterStore: new CounterStore()
+}
+
+export const StoreContext = createContext(store);   //react hook to store global state
+```
+
+3. Creating the 'useStore()' hook to enable the store usage in react components
+```tsx
+import { useContext } from "react";
+import { StoreContext } from "../stores/store";
+
+export function useStore() {
+    return useContext(StoreContext)
+}
+```
+
+
+## Other used npm packages
+
+- [react-calendar](https://www.npmjs.com/package/react-calendar)
+- [date-fns](https://date-fns.org/)
+
+## Some TypeScript notes
 
 ### `index.d.ts`
 - Type definitions
@@ -352,11 +438,6 @@ setSelectedActivity(newActivity);
 - expression {..activity, id: activities.length.toString()} creates a new object that contains all properties of the activity object and adds a new property id with a value of the    current length of the activities array
 - The spread operator {...activity} copies all the properties of the activity object into the new object.
 - The activities.length.toString() ensures that the id is a string representation of the array's length, which can serve as a simple unique identifier for the new activity.
-
-### Other used npm packages
-
-- [react-calendar](https://www.npmjs.com/package/react-calendar)
-- [date-fns](https://date-fns.org/)
 
 
 ## Architectural Patterns
