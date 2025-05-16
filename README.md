@@ -250,6 +250,27 @@ const queryClient = new QueryClient();
 </QueryClientProvider>
 ```
 
+### React query Cache states
+- Each piece of data (called a query) in React Query goes through 3 states:
+
+| State               | Description                                                                      |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `fresh`             | Recently fetched and **valid** (no need to refetch)                              |
+| `stale`             | **Potentially outdated** — will be refetched automatically in certain situations |
+| `inactive`          | Component using the query has **unmounted**, but cache still holds the data      |
+| `garbage collected` | Cache expired and removed (if not used recently)                                 |
+
+- **By default, React Query considers fetched data to be stale immediately after it's loaded.**
+
+### We can change how long data is considered “fresh” using staleTime:
+```tsx
+useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+  staleTime: 1000 * 60 * 5  // 5 minutes
+});
+```
+
 Docs: [TanStack Query](https://tanstack.com/query/latest/docs/framework/react)
 
 

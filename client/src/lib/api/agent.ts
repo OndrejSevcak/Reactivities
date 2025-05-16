@@ -1,4 +1,5 @@
 import axios from "axios";
+import { store } from "../stores/store";
 
 const sleep = (delay: number) => {
     return new Promise(resolve => {
@@ -12,15 +13,29 @@ const agent = axios.create({
 });
 
 //interceptors are functions that are called before a request is sent or after a response is received
-//this is an interceptor to introduce a fake delay in the response
+
+//outgoing request interceptor
+agent.interceptors.request.use(config => {
+    store.uiStore.isBusy();
+    return config;
+})
+
+//incoming response interceptor
 agent.interceptors.response.use(async response => {
     try{
         await sleep(1000);
         return response;
-    } catch (error) {
+    } 
+    catch (error) {
         console.log(error);
         return await Promise.reject(error);
+    } 
+    finally {
+        store.uiStore.isIdle();
     }
 })
+
+
+
 
 export default agent;

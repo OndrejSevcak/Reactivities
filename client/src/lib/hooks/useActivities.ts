@@ -1,15 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import agent from "../api/agent";
+import { useLocation } from "react-router";
 
 export const useActivities = (id?: string) => {
-    const queryClient = useQueryClient(); 
+    const queryClient = useQueryClient();
+    const location = useLocation(); 
 
     const {data: activities, isPending} = useQuery({    // -> {data: activities, isPending} is destructuring assignment
         queryKey: ['activities'],
         queryFn: async () => {
           const response = await agent.get<Activity[]>('/activities');  //base url is configured globally in agent.ts file
           return response.data;
-        }
+        },
+        enabled: !id && location.pathname === '/activities', 
+        staleTime: 1000 * 60,   //1 minute
     })
 
     //is executed every time a component is mounted be default
