@@ -7,20 +7,20 @@ namespace Application.Activities.DTOs;
 //this is a DTO (Data Transfer Object) that is used to transfer data between layers
 public class CreateActivityDto
 {
-    [Required]
+    //[Required] -> controller validation happens before the fluent validation in application layer, thus we remove the data annotation here
     public string Title { get; set; } = String.Empty;
-    [Required]
+    //[Required]
     public DateTime Date { get; set; }
-    [Required]
+    //[Required]
     public string Description { get; set; } = String.Empty;
-    [Required]
+    //[Required]
     public string Category { get; set; } = String.Empty;
-    [Required]
+    //[Required]
     public string City { get; set; } = String.Empty;
-    [Required]
+    //[Required]
     public string Venue { get; set; } = String.Empty;
-    [Required]
+    //[Required]
     public double Latitude { get; set; }
-    [Required]
+    //[Required]
     public double Longitude { get; set; }
 }
