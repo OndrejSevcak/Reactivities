@@ -2,6 +2,7 @@ using System;
 using Application.Activities.Commands;
 using Application.Activities.DTOs;
 using Application.Activities.Queries;
+using Application.Core;
 using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,8 @@ public class ActivitiesController : BaseApiController
         // if (activity == null) return NotFound(); //returns 404         
         // return activity;
 
-        return await Mediator.Send(new GetActivityDetails.Query{ Id = id});
+        //HandleResult is BaseApiController method that handles the result of the query
+        return HandleResult(await Mediator.Send(new GetActivityDetails.Query { Id = id }));
     }
 
     [HttpPost]
