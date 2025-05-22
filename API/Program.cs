@@ -12,7 +12,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddCors();
-builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>());
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>();   // Register all handlers in the assembly
+    config.AddOpenBehavior(typeof(Application.Core.ValidationBehaviour<,>));    // Register the validation middleware
+});
 builder.Services.AddValidatorsFromAssemblyContaining<CreateActivityValidator>();
 
 var app = builder.Build();
