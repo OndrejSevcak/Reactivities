@@ -52,6 +52,142 @@ Apply the migration:
 dotnet ef database update -p Persistence -s API
 ```
 
+## Validation
+
+- using FluentValidation nuget package
+
+**Creating a validation middleware to be added into MediatR pipeline**
+```csharp
+public class ValidationBehaviour<TRequest, TResponse>(IValidator<TRequest>? validator = null)
+    : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
+{
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    {
+        if (validator == null) return await next();
+
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
+
+        return await next();
+    }
+}
+```
+
+**Registering the middleware in Program.cs**
+```csharp
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>();   // Register all handlers in the assembly
+    config.AddOpenBehavior(typeof(Application.Core.ValidationBehaviour<,>));    // Register the validation middleware
+});
+```
+
+## Exception handling middleware
+
+- a class implementing 'IMiddleware' interface 'InvokeAsync' method
+
+```csharp
+public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+{
+    try
+    {
+        await next(context);    //trying to pass the request down the pipeline
+    }
+    catch (ValidationException ex)  //catching exception from our validation behaviour middleware
+    {
+        await HandleValidationException(context, ex);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex);
+    }
+}
+```
+
+**HandleValidationException method that return a custom exception response**
+```csharp
+    private static async Task HandleValidationException(HttpContext context, ValidationException ex)
+    {
+        var validationErrors = new Dictionary<string, string[]>();
+
+        if (ex.Errors is not null)
+        {
+            foreach (var error in ex.Errors)
+            {
+                if (validationErrors.TryGetValue(error.PropertyName, out var existingErrors))
+                {
+                    validationErrors[error.PropertyName] = existingErrors.Append(error.ErrorMessage).ToArray();
+                }
+                else
+                {
+                    validationErrors[error.PropertyName] = new[] { error.ErrorMessage };
+                }
+
+            }
+        }
+
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+        var validationProblemDetails = new ValidationProblemDetails(validationErrors)
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Validation Errors",
+            Type = "ValidationFailure",
+            Detail = "One or more validation errors occurred.",
+        };
+
+        await context.Response.WriteAsJsonAsync(validationProblemDetails);
+    }
+```
+
+**Program.cs configuration**
+```csharp
+//adding services to the container
+builder.Services.AddTransient<ExceptionMiddleware>();
+//Http request pipeline
+app.UseMiddleware<ExceptionMiddleware>();
+```
+
+**a 400 status code response now looks like this**
+```json
+{
+    "type": "ValidationFailure",
+    "title": "Validation Errors",
+    "status": 400,
+    "detail": "One or more validation errors occurred.",
+    "errors": {
+        "ActivityDto.Title": [
+            "Title is required"
+        ],
+        "ActivityDto.Date": [
+            "Date is required",
+            "Date must be in the future"
+        ],
+        "ActivityDto.Description": [
+            "Description is required"
+        ],
+        "ActivityDto.Category": [
+            "Category is required"
+        ],
+        "ActivityDto.City": [
+            "City is required"
+        ],
+        "ActivityDto.Venue": [
+            "Venue is required"
+        ],
+        "ActivityDto.Latitude": [
+            "Latitude is required"
+        ],
+        "ActivityDto.Longitude": [
+            "Longitude is required"
+        ]
+    }
+}
+```
+
 ## Architectural Patterns in .NET backend
 
 ### Clean Architecture (Uncle Bob)
