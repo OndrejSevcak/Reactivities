@@ -5,6 +5,7 @@ using MediatR;
 using Persistence;
 using Application.Mappings;
 using FluentValidation;
+using Application.Core;
 
 namespace Application.Activities.Commands;
 
@@ -17,21 +18,27 @@ namespace Application.Activities.Commands;
 public class CreateActivity
 {
     //// The Command class represents a command in the CQRS pattern. Commands are used to encapsulate data and intent for performing a specific action, such as creating an activity in this case.
-    public class Command : IRequest<string>
+    public class Command : IRequest<Result<string>>
     {
         public required CreateActivityDto ActivityDto { get; set; }
     }
 
     // The Handler class is responsible for handling the Command. It implements the IRequestHandler<Command, string> interface from MediatR, which is a library commonly used to implement CQRS in .NET applications.
-    public class Handler(AppDbContext context) : IRequestHandler<Command, string>
+    public class Handler(AppDbContext context) : IRequestHandler<Command, Result<string>>
     {
-        public async Task<string> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
             var activity = request.ActivityDto.AsActivity();
             context.Activities.Add(activity); //adds the activity to the context -> so there is no need to use Async version
-            await context.SaveChangesAsync(cancellationToken); //only here we communicate with the database
 
-            return activity.Id; //returns the id of the activity that was created, because it is created server side
+            //only here we communicate with the database
+            var saved = await context.SaveChangesAsync(cancellationToken) > 0;
+            if (!saved)
+            {
+                return Result<string>.Failure("Creating activity failed", 400);
+            } 
+
+            return Result<string>.Success(activity.Id); //returns the id of the activity that was created, because it is created server side
         }
     }
 }

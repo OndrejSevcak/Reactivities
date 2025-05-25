@@ -17,11 +17,11 @@ namespace API.Controllers
             _mediator ??= HttpContext.RequestServices.GetService<IMediator>()
                 ?? throw new InvalidOperationException("IMediator not found in the service collection.");
 
-        public ActionResult<T> HandleResult<T>(Result<T> result)
+        public ActionResult HandleResult<T>(Result<T> result)
         {
             //now our application layer handles the errors and return a Result object
             if (!result.IsSuccess && result.Code == 404) return NotFound();
-            if (result.IsSuccess && result.Value != null) return result.Value;
+            if (result.IsSuccess && result.Value != null) return Ok(result.Value);
             return BadRequest(result.Error);
         }
     }
