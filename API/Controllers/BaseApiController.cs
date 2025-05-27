@@ -13,6 +13,7 @@ namespace API.Controllers
 
         //this makes the mediator service available to all controllers that inherit from this class
         //so they do not have to inject it in the constructor
+        //it is lazily instantiated when it is first accessed - no instance is created until it is needed
         protected IMediator Mediator =>
             _mediator ??= HttpContext.RequestServices.GetService<IMediator>()
                 ?? throw new InvalidOperationException("IMediator not found in the service collection.");

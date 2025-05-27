@@ -22,6 +22,8 @@ public class ActivitiesController : BaseApiController
     [HttpGet("{id}")]
     public async Task<ActionResult<Activity>> GetActivity(string id)
     {
+        throw new Exception("This is a test exception"); //This will be caught by the ExceptionMiddleware
+
         //HandleResult is BaseApiController method that handles the result of the query
         return HandleResult(await Mediator.Send(new GetActivityDetails.Query { Id = id }));
     }
