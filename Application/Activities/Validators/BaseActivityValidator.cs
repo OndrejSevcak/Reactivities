@@ -4,6 +4,8 @@ using FluentValidation;
 
 namespace Application.Activities.Validators;
 
+//T is the type being validated
+//TDto is the actual object containing the properties to validate
 public class BaseActivityValidator<T, TDto> : AbstractValidator<T> where TDto : BaseActivityDto
 {
     public BaseActivityValidator(Func<T, TDto> selector)

@@ -6,7 +6,7 @@ namespace Application.Mappings;
 
 public static class ActivityMappings
 {
-    public static Activity UpdateActivity(this Activity activity, Activity updatedActivity)
+    public static Activity UpdateActivity(this Activity activity, EditActivityDto updatedActivity)
     {
         if (updatedActivity == null) throw new ArgumentNullException(nameof(updatedActivity));
 
@@ -14,7 +14,7 @@ public static class ActivityMappings
         activity.Date = updatedActivity.Date;
         activity.Description = updatedActivity.Description;
         activity.Category = updatedActivity.Category;
-        activity.IsCanceled = updatedActivity.IsCanceled;
+        activity.IsCanceled = updatedActivity.IsCancelled;
         activity.City = updatedActivity.City;
         activity.Venue = updatedActivity.Venue;
         activity.Latitude = updatedActivity.Latitude;

@@ -13,6 +13,8 @@ public class BaseActivityDto
 
     public string Category { get; set; } = String.Empty;
 
+    public bool IsCancelled { get; set; }
+
     public string City { get; set; } = String.Empty;
 
     public string Venue { get; set; } = String.Empty;
