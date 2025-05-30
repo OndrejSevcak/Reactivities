@@ -8,6 +8,8 @@ namespace Application.Activities.Validators;
 //TDto is the actual object containing the properties to validate
 public class BaseActivityValidator<T, TDto> : AbstractValidator<T> where TDto : BaseActivityDto
 {
+    // Constructor that takes a selector function to access the DTO properties
+    //Function<T, TDto> is a delegate representing function that takes an instance of T and returns an instance of TDto
     public BaseActivityValidator(Func<T, TDto> selector)
     {
         RuleFor(x => selector(x).Title)

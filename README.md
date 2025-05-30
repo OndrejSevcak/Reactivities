@@ -662,6 +662,19 @@ if (activity.id) {
 }
 ```
 
+### Typescript destructuring with default values and type annotations
+-let have this parameter syntax:
+```tsx
+    mutationFn: async ({path, method = 'get'} : {path: string, method: string}) => {
+      
+    }
+```
+
+- *{path, method = 'get'}* This is object destructuring. It extracts the path and method properties from the object passed as an argument. If method is not provided, it defaults to 'get'.
+
+- *: {path: string, method: string}* This is a type annotation. It tells TypeScript that the argument must be an object with path and method properties, both of type string.
+
+
 ### Immutability in State Updates
 
 ```tsx

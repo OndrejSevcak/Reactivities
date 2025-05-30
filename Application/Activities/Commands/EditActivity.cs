@@ -10,24 +10,26 @@ namespace Application.Activities.Commands;
 
 public class EditActivity
 {
+    //ccommand class represents the request to edit an activity
     public class Command : IRequest<Result<Unit>>
     {
         public required EditActivityDto ActivityDto { get; set; }
     }
 
+    //The Handler class is responsible for processing the command.
     public class Handler(AppDbContext context) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var activity = await context.Activities
+            var activityFromDb = await context.Activities
                 .FindAsync([request.ActivityDto.Id], cancellationToken);
 
-            if (activity == null)
+            if (activityFromDb == null)
             {
                 return Result<Unit>.Failure("Activity not found", 404);
             }
 
-            activity.UpdateActivity(request.ActivityDto); //update the activity with the new values, its a custom mapping helper method
+            activityFromDb.UpdateActivity(request.ActivityDto); //update the activity with the new values, its a custom mapping helper method
 
             var inserted = await context.SaveChangesAsync(cancellationToken) > 0;
 
@@ -38,7 +40,7 @@ public class EditActivity
             else
             {
                 return Result<Unit>.Failure("Deleting activity failed", 400);
-            } 
+            }
         }
     }
 }
