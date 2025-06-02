@@ -36,11 +36,21 @@ agent.interceptors.response.use(
         await sleep(1000);
         store.uiStore.isIdle();
         
-        const { status } = error.response;
+        const { status, data } = error.response;    //axios response object has a response property that contains the status code and data returned from the server
         switch (status) {
             case 400:
                 //bad request
-                toast.error("Bad request");
+                if(data.errors){
+                    const modalStateErrors = [];
+                    for(const key in data.errors){
+                        if(data.errors[key]){
+                            modalStateErrors.push(data.errors[key]);
+                        }
+                    }
+                    throw modalStateErrors.flat();
+                } else{
+                    toast.error(data);
+                }
                 break;
             case 401:
                 //unauthorized
@@ -52,7 +62,7 @@ agent.interceptors.response.use(
                 break;
             case 500:
                 //server error
-                toast.error("Server error");
+                router.navigate('/server-error', { state: { error: data}} )
                 break;
             default:
                 toast.error("Unknown error");
