@@ -20,7 +20,7 @@ createRoot(document.getElementById('root')!).render(
     <StoreContext.Provider value={store}>
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools /> 
-        <ToastContainer position='bottom-right' theme='colored' aria-label="Notifications ⌘ + F" />
+        <ToastContainer aria-label="Notification Toasts" position='bottom-right' hideProgressBar theme='colored' />
         <RouterProvider router={router} />
       </QueryClientProvider>
     </StoreContext.Provider>

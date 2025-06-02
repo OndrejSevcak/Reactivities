@@ -2,6 +2,7 @@ import ActivityDashboard from "../../features/activities/dashboard/ActivityDashb
 import ActivityDetailPage from "../../features/activities/details/ActivityDetailPage";
 import ActivityForm from "../../features/activities/form/ActivityForm";
 import Counter from "../../features/counter/Counter2";
+import NotFound from "../../features/errors/NotFound";
 import TestErrors from "../../features/errors/TestErrors";
 import HomePage from "../../features/home/HomePage";
 import App from "../layout/App";
@@ -18,7 +19,8 @@ export const router = createBrowserRouter([
             {path: 'createActivity', element: <ActivityForm key='create' />},   //the key will force the component to remount when switching paths between createActivity and edit
             {path: 'edit/:id', element: <ActivityForm />},
             {path: 'counter', element: <Counter />},
-            {path: 'counter', element: <TestErrors />}
+            {path: 'errors', element: <TestErrors />},
+            {path: 'not-found', element: <NotFound />}
         ]
     }
 ]);

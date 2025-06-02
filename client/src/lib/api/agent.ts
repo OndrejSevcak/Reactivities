@@ -1,5 +1,7 @@
 import axios from "axios";
 import { store } from "../stores/store";
+import { toast } from "react-toastify";
+import { router } from "../../app/router/Routes";
 
 const sleep = (delay: number) => {
     return new Promise(resolve => {
@@ -21,19 +23,44 @@ agent.interceptors.request.use(config => {
 })
 
 //incoming response interceptor
-agent.interceptors.response.use(async response => {
-    try{
+agent.interceptors.response.use(
+    //the use() method takes two functions as arguments: 
+    //      onFulfilled?: ((value: AxiosResponse<any, any>) => AxiosResponse<any, any> | Promise<AxiosResponse<any, any>>) | null | undefined, 
+    //      onRejected?: ((error: any) => any) | null) => number
+    async response => {
         await sleep(1000);
+        store.uiStore.isIdle(); //changes isLoading flag to false
         return response;
-    } 
-    catch (error) {
-        console.log(error);
-        return await Promise.reject(error);
-    } 
-    finally {
+    },
+    async error => {
+        await sleep(1000);
         store.uiStore.isIdle();
+        
+        const { status } = error.response;
+        switch (status) {
+            case 400:
+                //bad request
+                toast.error("Bad request");
+                break;
+            case 401:
+                //unauthorized
+                toast.error("Unauthorized");
+                break;
+            case 404:
+                //not found
+                router.navigate('/not-found');
+                break;
+            case 500:
+                //server error
+                toast.error("Server error");
+                break;
+            default:
+                toast.error("Unknown error");
+        
+        }
+        return Promise.reject(error);
     }
-})
+)
 
 
 

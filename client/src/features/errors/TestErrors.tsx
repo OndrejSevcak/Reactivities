@@ -7,6 +7,7 @@ import { Alert, Button, ButtonGroup, Typography } from '@mui/material';
 export default function TestErrors() {
   const [validationErrors, setValidationError] = useState<string[]>([])
 
+  //useMutation() is TanStack query hook for making request that can change data on the server
   const { mutate } = useMutation({
     mutationFn: async ({path, method = 'get'} : {path: string, method: string}) => {
       if(method === 'post'){

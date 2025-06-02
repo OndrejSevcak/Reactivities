@@ -463,9 +463,16 @@ const {data: activities, isPending} = useQuery({    // -> {data: activities, isP
 
 **Hooks**
 
-- useQuery() -> getting data from server for the first time
-- useQuery() -> getting same data again from different component, will get the cahed data from queryCache
-- useMutation() ->updating the same data on the server, (set, invalidate(new fetch from server), optimistic update the cache)
+- **useQuery()** -> getting data from server for the first time
+                 OR getting same data again from different component, will get the cahed data from queryCache
+- **useMutation()** ->making request that can change data on server(POST, UPDATE...) -> updating the same data on the server, (set, invalidate(new fetch from server), optimistic update the cache)
+
+**Difference between useQuery and useMutation**
+
+- It's a difference in what happens to the backend state. In a query the intention is that you're requesting a particular dataset from some source. The request does not change any backend state, and any re-requests for the data will also not cause a change to backend state.
+
+- In a mutation the intention is to create some change in the backend state. (e.g. creating a new record in a database, or updating an existing record).
+
 
 Install:
 ```bash
@@ -674,6 +681,34 @@ if (activity.id) {
 
 - *: {path: string, method: string}* This is a type annotation. It tells TypeScript that the argument must be an object with path and method properties, both of type string.
 
+### Typescript function that takes another function as parameter
+
+- in TypeScript, you define that a function takes another function as a parameter by specifying the parameter’s type as a function signature. So there are no delegates like in C#
+
+```tsx
+//(message: string) => void is the type of the callback parameter: a function that takes a string and returns nothing.
+function doSomething(callback: (message: string) => void) {
+    callback("Hello from TypeScript!");
+}
+
+// Usage
+doSomething((msg) => console.log(msg));
+```
+
+ - **with multiple parameters and return type**
+```tsx
+function calculate(a: number, b: number, operation: (x: number, y: number) => number): number {
+    return operation(a, b);
+}
+
+calculate(2, 3, (x, y) => x + y); // returns 5
+```
+
+- **using type aliases**
+```tsx
+type StringCallback = (message: string) => void;
+function doSomething(callback: StringCallback) { ... }
+```
 
 ### Immutability in State Updates
 
