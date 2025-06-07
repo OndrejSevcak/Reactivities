@@ -644,13 +644,13 @@ export function useStore() {
 }
 ```
 
-## React hook forms
+## Using React hook form
 
 **Instalation packages:**
-- npm install @hookform/resolvers zod *(for validation)*
+- npm install @hookform/resolvers zod *(validation library)*
 - npm install react-hook-form
 
-***Documentation**:
+**Documentation**:
 - https://react-hook-form.com/docs/useform
 - https://www.npmjs.com/package/@hookform/resolvers#zod
 
