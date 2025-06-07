@@ -644,6 +644,38 @@ export function useStore() {
 }
 ```
 
+## React hook forms
+
+**Instalation packages:**
+- npm install @hookform/resolvers zod *(for validation)*
+- npm install react-hook-form
+
+***Documentation**:
+- https://react-hook-form.com/docs/useform
+- https://www.npmjs.com/package/@hookform/resolvers#zod
+
+**Usage:**
+```tsx
+//useForm() hook methods
+const { register, reset, handleSubmit } = useForm();
+
+//input fields needs to be registered
+<TextField {...register('title')} label="Title" defaultValue={activity?.title} />
+
+//function to submit the form
+const onSubmit = (data: FieldValues) => {
+        console.log(data);
+    }
+
+//will be passed on the onSubmit form event
+component="form" onSubmit={handleSubmit(onSubmit)}
+
+////to reset the form we need to implement a useEffect hook
+    useEffect(() => {
+        if(activity) reset(activity);
+    }, [activity, reset]);
+```
+
 
 ## Other used npm packages
 
